@@ -37,7 +37,7 @@ src/
 - MySQL 8.x
 - Redis 7.x
 - Gradle 7+
-- Tested on Windows 11 + WSL2 (Linux/macOS supported)
+- Tested on Windows 11
 
 ---
 
