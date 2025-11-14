@@ -1,4 +1,4 @@
-package com.thesisTest.thesisTest.testRedis;
+package com.benchmark.redis;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

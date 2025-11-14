@@ -1,13 +1,12 @@
-package com.thesisTest.thesisTest;
+package com.benchmark;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ThesisTestApplication {
+public class BenchmarkApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ThesisTestApplication.class, args);
+		SpringApplication.run(BenchmarkApplication.class, args);
 	}
-
 }
