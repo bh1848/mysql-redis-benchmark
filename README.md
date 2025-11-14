@@ -9,6 +9,8 @@ All results are printed through logs (no CSV or result files are generated).
 
 ## Directory Structure
 
+```text
+
 src/
 └── main/
 ├── java/com/benchmark/
@@ -25,6 +27,7 @@ src/
 ├── application-mysql.yml
 └── application-redis.yml
 
+```
 ---
 
 ## System Requirements
