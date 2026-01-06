@@ -39,7 +39,7 @@
 > "단순 CRUD 작업에서 MySQL과 Redis의 처리 성능 차이는 어느 정도이며,
 > 실제 서비스 설계 시 Redis를 캐시 혹은 대체 저장소로 고려할 근거가 되는가?"
 
-## 3. 실험 환경
+## &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3. 실험 환경
 
 ### 3.1 하드웨어 및 OS
 
@@ -57,7 +57,7 @@
   * MySQL (Disk-based RDBMS)
   * Redis (In-memory Key-Value Store)
 
-## 4. 실험 설계
+## &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4. 실험 설계
 
 ### 4.1 공통 조건
 
@@ -83,7 +83,7 @@
 * Value: 무작위 정수
 * RedisTemplate 기반 CRUD 수행
 
-## 5. 프로젝트 구조
+## &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5. 프로젝트 구조
 
 ```
 mysql-redis-benchmark-main
@@ -105,7 +105,7 @@ mysql-redis-benchmark-main
 
 공통 추상 클래스를 통해 실험 조건을 통일하고, DB 접근 방식만 분리하였다.
 
-## 6. 실행 방법
+## &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6. 실행 방법
 
 ### 6.1 데이터베이스 준비
 
@@ -141,7 +141,7 @@ mysql-redis-benchmark-main
 - 모든 데이터를 RDBMS에 저장하기보다 역할 분리 아키텍처가 필요
 - 데이터 특성에 따른 저장소 선택이 서비스 성능에 직접적인 영향을 미침
 
-## 9. 실험의 한계 및 배운 점
+## &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9. 실험의 한계 및 배운 점
 
 한계점은 다음과 같다.
 
