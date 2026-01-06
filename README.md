@@ -24,14 +24,14 @@ DB 구조 차이가 실제 지연시간에 미치는 영향을 분석한다.
 
 본 프로젝트는 MySQL과 Redis의 CRUD 연산 성능 차이를 정량적으로 비교한다.
 
-단순히 “어떤 DB가 더 빠른가”를 비교하는 것이 아니라,
+### 데이터 모델 비교 (Target Model)
+| MySQL (Relational Model) | Redis (Key-Value Model) |
+| :---: | :---: |
+| ![MySQL 구조도](images/mysql-architecture.png) | ![Redis 구조도](/images/redis-architecture.png) |
+| **복잡한 참조 및 관계 지향** | **단순 Key 기반 접근** |
 
-- 동일한 애플리케이션 로직
-- 동일한 실행 횟수
-- 동일한 하드웨어 및 소프트웨어 환경
-
-을 유지한 상태에서  
-저장소 구조(Disk vs In-memory) 차이만이 성능에 미치는 영향을 관찰하는 데 목적이 있다.
+- **MySQL:** 위 그림과 같이 여러 테이블 간의 Foreign Key를 유지하며 정규화된 데이터를 처리합니다.
+- **Redis:** 복잡한 관계 없이 메모리 상에서 즉각적인 Key-Value 매핑을 통해 데이터를 처리합니다.
 
 ## 2. 연구 및 실험 배경
 
