@@ -33,8 +33,8 @@
 위의 이론적 차이를 검증하기 위해, 동일한 Spring Boot 애플리케이션 로직 내에서 실행 Profile을 통해 하위 구현체만 변경하는 방식으로 변수를 통제했습니다.
 
 ![Experimental Architecture](./images/architecture_overview.png)
-> - Profile 분기: 실행 시점의 Profile에 따라 `JdbcTemplate` 또는 `RedisTemplate`으로 로직이 분기됩니다.
-> - 설계 의도: 공통 비즈니스 로직은 유지한 채, 최종 저장소에 접근하는 기술과 인프라(Disk vs Memory)만 변경하여 순수한 성능 차이를 측정하도록 설계했습니다.
+> - 실행 시점의 Profile에 따라 JdbcTemplate 또는 RedisTemplate으로 로직이 분기됩니다.
+> - 공통 비즈니스 로직은 유지한 채, 최종 저장소에 접근하는 기술과 인프라(Disk vs Memory)만 변경하여 순수한 성능 차이를 측정하도록 설계했습니다.
 
 
 ## 2. 설계 의도
