@@ -35,7 +35,7 @@
 
 ![Experimental Architecture](./images/architecture_overview.png)
 
-> * 실행 시점의 Profile에 따라 JdbcTemplate 또는 RedisTemplate로 로직이 분기됩니다.
+> * 실행 시점의 Profile에 따라 JdbcTemplate 또는 RedisTemplate로 분기됩니다.
 > * 공통 비즈니스 로직은 유지한 채, 최종 저장소에 접근하는 기술과 인프라(Disk vs Memory)만 변경하여 순수한 성능 차이를 측정하도록 설계했습니다.
 
 
@@ -79,14 +79,14 @@
 ~~~bash
 src/main/java/com/benchmark
 ├── core
-│   └── AbstractBatchExperiment.java  # Template Method (실험 제어)
+│   └── AbstractBatchExperiment.java  # Template Method
 ├── mysql
 │   ├── MysqlBatchExperiment.java     # JDBC 구현체
 │   └── application-mysql.yml         # MySQL 연결 설정
 ├── redis
 │   ├── RedisBatchExperiment.java     # RedisTemplate 구현체
-│   ├── RedisConfig.java              # 직렬화(Serializer) 최적화
-│   └── application-redis.yml         # RDBMS 설정 Exclude (격리)
+│   ├── RedisConfig.java              # 직렬화 최적화
+│   └── application-redis.yml         # RDBMS 설정 제외
 └── BenchmarkApplication.java
 ~~~
 
@@ -149,8 +149,8 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 * 트랜잭션 부재: RDBMS의 강점인 ACID 트랜잭션 보장과 복잡한 Join 연산 시나리오는 제외된 단순 CRUD 비교입니다.
 
 ### 시사점 및 배운 점
-- 단순 조회 성능이 최대 12배까지 차이나는 것을 확인하며, 세션이나 캐시 데이터는 Redis로, 데이터 정합성이 중요한 정보는 MySQL로 처리하는 하이브리드 아키텍처의 필요성을 체감했습니다.
+* 단순 조회 성능이 최대 12배까지 차이나는 것을 확인하며, 세션이나 캐시 데이터는 Redis로, 데이터 정합성이 중요한 정보는 MySQL로 처리하는 하이브리드 아키텍처의 필요성을 체감했습니다.
 
-- 실험 코드를 작성하며 Template Method Pattern으로 로직의 중복을 제거하고, Spring Profile로 테스트 환경을 격리하는 과정을 통해 견고한 애플리케이션 설계 역량을 향상시켰습니다.
+* 실험 코드를 작성하며 Template Method Pattern으로 로직의 중복을 제거하고, Spring Profile로 테스트 환경을 격리하는 과정을 통해 견고한 애플리케이션 설계 역량을 향상시켰습니다.
 
-- "NoSQL이 빠르다"는 막연한 추측 대신, 자료구조(B-Tree vs Hash)의 차이가 실제 Latency에 어떻게 반영되는지 수치로 확인함으로써 기술 도입의 타당성을 설명할 수 있게 되었습니다.
+* "NoSQL이 빠르다"는 막연한 추측 대신, 자료구조(B-Tree vs Hash)의 차이가 실제 Latency에 어떻게 반영되는지 수치로 확인함으로써 기술 도입의 타당성을 설명할 수 있게 되었습니다.
