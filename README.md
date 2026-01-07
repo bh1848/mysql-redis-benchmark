@@ -1,143 +1,143 @@
-# ⚖️ MySQL–Redis 데이터 처리 성능 비교 실험 (Benchmarking)
+# ⚖️MySQL vs Redis Performance Benchmark
 
-본 레포지토리는 학술 논문 「MySQL과 Redis의 데이터 처리 성능 비교 평가」(JICS, 2024)에서 사용된 실험 코드를 재현하고 공개하기 위한 프로젝트입니다. 관계형 데이터베이스(MySQL)와 인메모리 NoSQL(Redis)를 대상으로 동일한 조건에서 CRUD 연산 성능을 측정하여, DB 구조 차이가 실제 지연시간(Latency)에 미치는 영향을 분석합니다.
+> 학술 논문 [MySQL과 Redis의 데이터 처리 성능 비교 평가 (JICS, 2024)] 실험 코드 레포지토리
+> 저자: 방혁, 김서현, 전상훈
 
-## 📌 목차
-- 1. [개요](#1-개요)
-- 2. [연구 및 실험 배경](#2-연구-및-실험-배경)
-- 3. [실험 환경](#3-실험-환경)
-- 4. [실험 설계](#4-실험-설계)
-- 5. [Engineering Focus (설계 핵심)](#5-engineering-focus-설계-핵심)
-- 6. [프로젝트 구조](#6-프로젝트-구조)
-- 7. [실행 방법](#7-실행-방법)
-- 8. [실험 결과 요약 및 그래프](#8-실험-결과-요약-및-그래프)
-- 9. [시사점 및 배운 점](#9-시사점-및-배운-점)
-- 10. [논문 정보](#10-논문-정보)
+본 레포지토리는 관계형 데이터베이스(RDBMS, MySQL)와 인메모리 기반 NoSQL(Redis)의 데이터 처리 성능을 정량적으로 비교하기 위해 작성된 벤치마크 프로젝트입니다.
+동일한 하드웨어 및 애플리케이션 로직 하에서 저장소 구조가 실제 CRUD Latency에 미치는 영향을 분석했습니다.
 
-## 1. 개요
-본 프로젝트는 MySQL과 Redis의 CRUD 연산 성능 차이를 정량적으로 비교합니다.
+## 목차
+1. [프로젝트 개요 및 배경](#1-프로젝트-개요-및-배경)
+2. [설계 의도](#2-설계-의도)
+3. [실험 환경 및 시나리오](#3-실험-환경-및-시나리오)
+4. [프로젝트 구조](#4-프로젝트-구조)
+5. [실행 방법](#5-실행-방법)
+6. [실험 결과](#6-실험-결과)
+7. [한계점 및 기술적 회고](#7-한계점-및-기술적-회고)
+8. [시사점 및 배운 점](#8-시사점-및-배운-점)
 
-### Architecture Overview
 
+## 1. 프로젝트 개요 및 배경
+
+대규모 트래픽을 처리하는 백엔드 시스템에서 데이터 저장소 선택은 성능의 핵심 변수입니다.
+단순히 "NoSQL이 빠르다"는 통념을 넘어, "단순 CRUD 작업에서 Redis 도입이 RDBMS 대비 수치적으로 어느 정도의 이점을 주는가?"를 증명하여, 실무적인 캐싱 전략 수립의 근거를 마련하고자 했습니다.
+
+### Architecture Comparison
 
 | MySQL (Relational Model) | Redis (Key-Value Model) |
 | :---: | :---: |
 | ![MySQL Architecture](./images/mysql_architecture.png) | ![Redis Architecture](./images/redis_architecture.png) |
-| **관계 중심 구조 (Join 기반 접근)** | **Direct Key–Value 접근 구조** |
-
-- **MySQL**: 여러 테이블 간 관계 기반 접근, 인덱스 탐색 및 쿼리 해석으로 인한 구조적 오버헤드 발생.
-- **Redis**: 메모리 상에서 Key를 통해 Value에 즉시 접근, 디스크 I/O 제거로 인한 단순 구조.
-
-## 2. 연구 및 실험 배경
-대규모 트래픽을 처리하는 웹 서비스에서 데이터 저장소의 선택은 서비스 응답 지연과 직결됩니다. 
-특히 로그인 세션, 캐시 데이터, 로그성 데이터 등 복잡한 조인이나 트랜잭션이 필요하지 않은 데이터는 전통적인 RDBMS보다 NoSQL이 더 적합할 수 있습니다. 
-
-본 실험은 **"단순 CRUD 작업에서 MySQL과 Redis의 처리 성능 차이는 어느 정도이며, 실제 서비스 설계 시 Redis를 캐시 또는 대체 저장소로 고려할 수 있는 근거가 되는가?"**라는 질문에서 출발했습니다.
-
-## 3. 실험 환경
-### 3.1 하드웨어 및 OS
-- OS: Windows 11 (64bit)
-- CPU: Intel i5-1340P / Memory: 16GB RAM
-
-### 3.2 소프트웨어 스택
-- Java: 11 / Spring Boot: 2.7.16
-- Redis: 6.4.0 / MySQL: 8.0.33
-- Gradle: 8.5 (Wrapper 기준)
-
-## 4. 실험 설계
-### 4.1 공통 조건
-- 삽입 / 조회 / 삭제 연산을 각각 10,000회 수행
-- 1,000회 단위로 평균 수행 시간(ms) 측정 (Batch Processing)
-- 동일한 애플리케이션 로직 사용 및 실험 중 다른 프로세스 최소화
-
-### 4.2 MySQL 및 Redis 실험 방식
-- **MySQL**: `TEST_TABLE(ID, DATA)` 구조, ID(PK) 기반 `JdbcTemplate` 연산 수행.
-- **Redis**: Key-Value 구조 (`user:{id}`), `RedisTemplate` 기반 연산 수행.
-
-## 5. 설계 핵심
-실험의 **신뢰성**과 **변수 통제**를 위해 적용한 백엔드 설계 전략입니다.
-
-### 5.1 Template Method Pattern (`AbstractBatchExperiment.java`)
-- 실험의 공통 워크플로우(Warm-up, 1,000회 단위 배치 실행, 평균 산출)를 상위 클래스에 고정했습니다.
-- 이를 통해 MySQL과 Redis 간의 로직 편차를 제거하고, 오직 DB 엔진의 구조적 차이만이 결과에 반영되도록 설계했습니다.
-
-### 5.2 리소스 분리리 (`application-*.yml`)
-- `application-redis.yml` 실행 시 `autoconfigure.exclude` 옵션을 사용하여 JDBC 및 JPA 관련 자동 설정을 명시적으로 차단했습니다.
-- Redis 성능 측정 시 불필요한 HikariCP 커넥션 풀 생성 및 메모리 점유를 방지하여 순수 저장소 성능을 격리 측정했습니다.
+| 관계 중심 구조 (Join 기반 접근)<br>인덱스 탐색 및 디스크 I/O 발생 | Direct Key–Value 접근 구조<br>메모리 직접 접근으로 Latency 최소화 |
 
 
-## 6. 프로젝트 구조
+## 2. 설계 의도
 
-```bash
-mysql-redis-benchmark-main
-├── src/main/java/com/benchmark
-│   ├── core
-│   │   └── AbstractBatchExperiment.java (실험 흐름 공통화)
-│   ├── mysql
-│   │   └── MySQLExperiment.java (JDBC 기반 구현체)
-│   ├── redis
-│   │   ├── RedisBatchExperiment.java (RedisTemplate 기반 구현체)
-│   │   └── RedisConfig.java (직렬화 최적화 설정)
-│   └── BenchmarkApplication.java
-└── src/main/resources
-    ├── application-mysql.yml
-    └── application-redis.yml (리소스 격리 설정)
-```
+단순한 API 호출 테스트가 아닌, 실험의 재현성과 변수 통제를 위해 다음과 같은 설계를 적용했습니다.
 
+### 2.1 Template Method Pattern
+두 데이터베이스의 측정 방식이 다르면 오차가 발생할 수 있습니다. 이를 방지하기 위해 AbstractBatchExperiment 추상 클래스를 설계하여 실험의 라이프사이클을 통제했습니다.
 
-## 6. 실행 방법
+* Source: src/main/java/com/benchmark/core/AbstractBatchExperiment.java
+* Design:
+    * run() 메서드 내에서 워밍업, 타이머 측정, 로깅 흐름을 고정.
+    * 하위 구현체(MysqlBatchExperiment, RedisBatchExperiment)는 순수 DB 연산 로직만 구현하도록 강제하여 측정 오차 최소화.
 
-```bash
-# MySQL 실험 실행
-./gradlew bootRun --args='--spring.profiles.active=mysql'
+### 2.2 리소스 격리
+정확한 Redis 성능 측정을 위해, Redis 실험 실행 시 RDBMS 관련 리소스가 메모리를 점유하거나 커넥션을 맺는 것을 차단했습니다.
 
-# Redis 실험 실행
-./gradlew bootRun --args='--spring.profiles.active=redis'
-```
+* Source: src/main/resources/application-redis.yml
+* Detail: Spring Boot의 autoconfigure.exclude 옵션을 사용하여 DataSource, Hibernate, TransactionManager 등 실험과 무관한 Bean 생성을 원천 차단했습니다.
 
-실행 시 MySQL → Redis에 순서로 실험이 수행되며, 각 연산의 평균 처리 시간이 로그로 출력된다.
+---
 
+## 3. 실험 환경 및 시나리오
 
-## 7. 실험 결과 요약 및 그래프
-논문 데이터와 실제 소스 코드 실행을 통해 도출된 핵심 결과입니다. 모든 수치는 1,000회 단위 배치 측정값의 평균을 기준으로 합니다.
+### 3.1 Environment
+* OS: Windows 11 (64bit)
+* H/W: Intel Core i5-1340P, 16GB RAM
+* Stack: Java 11, Spring Boot 2.7.16, Gradle 8.5
+* Database: MySQL 8.0.33, Redis 6.4.0
 
-### 📊 주요 성능 데이터
-- **평균 처리 속도**: Redis가 MySQL 대비 약 **7.78배** 빠른 응답성을 보임.
-- **연산별 상세 비교**:
-  - **삽입(Insert)**: Redis가 약 **5.84배** 빠름
-  - **조회(Select)**: Redis가 약 **6.61배** 빠름
-  - **삭제(Delete)**: Redis가 약 **12.33배** 빠름
-
-이는 Redis의 인메모리 구조와 단순 Key-Value 접근 방식이 디스크 기반 RDBMS의 인덱스 탐색 및 쿼리 해석 과정보다 지연시간 측면에서 압도적으로 유리함을 증명합니다.
+### 3.2 Methodology
+* Data Size: 총 10,000건의 데이터 (Integer Key-Value)
+* Batch: 1,000건 단위로 나누어 평균 수행 시간(ms) 측정
+* Operation:
+    * MySQL: JdbcTemplate 사용, PK(ID) 기반 단건 처리 (인덱스 활용)
+    * Redis: RedisTemplate 사용, Key(user:{id}) 기반 Direct Access
 
 
-## 9. 실험의 한계 및 향후 과제
+## 4. 프로젝트 구조
 
-현 프로젝트는 소스 코드의 목적에 따라 다음과 같은 제약 사항을 가지고 있습니다.
-
-- **인프라 환경**: 단일 노드(Single Node) 환경 측정으로, 실제 운영 환경에서의 **클러스터링 및 네트워크 오버헤드**는 반영되지 않았습니다.
-- **기능적 범위**: RDBMS의 강점인 **트랜잭션 보장(ACID) 및 복잡한 Join 연산** 시나리오는 제외된 단순 CRUD 비교입니다.
-- **지속성 설정**: Redis의 영속성 옵션(RDB/AOF)이 비활성화된 상태이므로, 실제 데이터 유실 방지 설정을 적용할 경우 성능 격차는 줄어들 수 있습니다.
-
-
-## 8. 시사점 및 배운 점
-
-본 실험과 설계 과정을 통해 백엔드 엔지니어로서 필요한 기술적 판단 근거와 역량을 체득했습니다.
-
-### 💡 기술적 통찰 (Technical Insights)
-- **데이터 성격에 따른 저장소 전략**: 단순 CRUD 지연시간 차이(최대 12배)를 통해, 응답 속도가 생명인 **세션 관리나 캐시**에는 Redis가 필수적임을 수치로 확인했습니다.
-- **Polyglot Persistence의 필요성**: 모든 데이터를 RDBMS에 몰아넣기보다, 서비스 요구사항에 맞춰 **Cache Aside** 패턴 등을 적용해 부하를 분산하는 아키텍처 설계의 중요성을 배웠습니다.
-- **데이터 기반 의사결정**: "NoSQL이 빠르다"는 막연한 추측 대신, **B-Tree와 Hash Table의 구조적 차이**를 실제 성능 데이터와 연결하여 기술을 선택하는 엔지니어링 마인드를 갖추게 되었습니다.
-
-### 🌱 성장 포인트 (Engineering Growth)
-- **실험의 신뢰성 확보**: `AbstractBatchExperiment`를 설계하며 **템플릿 메서드 패턴**을 적용, 로직의 일관성을 유지함으로써 실험의 변수를 통제하는 법을 배웠습니다.
-- **리소스 최적화 및 격리**: Spring Profile과 `autoconfigure.exclude`를 활용해 측정 대상 외의 리소스(HikariCP 등)가 결과에 미치는 영향을 차단하는 **실무적인 환경 설정 능력**을 키웠습니다.
+~~~bash
+src/main/java/com/benchmark
+├── core
+│   └── AbstractBatchExperiment.java  # Template Method
+├── mysql
+│   ├── MysqlBatchExperiment.java     # JDBC 구현체
+│   └── application-mysql.yml         # MySQL 연결 설정
+├── redis
+│   ├── RedisBatchExperiment.java     # RedisTemplate 구현체
+│   ├── RedisConfig.java              # 직렬화 최적화
+│   └── application-redis.yml         # Redis 연결 설정
+└── BenchmarkApplication.java
+~~~
 
 
-## 10. 논문 정보
-- **논문명**: MySQL과 Redis의 데이터 처리 성능 비교 평가
-- **게재지**: Journal of Internet Computing and Services (JICS)
-- **게재년도**: 2024
-- **저자**: 방혁, 김서현, 전상훈
+## 5. 실행 방법
 
-본 레포지토리는 위 논문의 실험 재현 및 소스 코드 공개 목적으로 제공됩니다.
+Gradle Wrapper를 사용하여 별도의 설치 없이 실행 가능합니다.
+
+1. MySQL 벤치마크 실행
+~~~bash
+# Mac/Linux
+./gradlew bootRun --args="--spring.profiles.active=mysql"
+
+# Windows (CMD/PowerShell)
+gradlew bootRun --args="--spring.profiles.active=mysql"
+~~~
+
+2. Redis 벤치마크 실행
+~~~bash
+# Mac/Linux
+./gradlew bootRun --args="--spring.profiles.active=redis"
+
+# Windows (CMD/PowerShell)
+gradlew bootRun --args="--spring.profiles.active=redis"
+~~~
+
+> Note: 실행 시 Batch 1 - Insert Avg: ... 형태의 로그가 출력되며 각 단계별 소요 시간이 기록됩니다.
+
+
+## 6. 실험 결과
+
+논문 및 본 코드 실행을 통해 도출된 10,000회 연산 평균 수행 시간입니다. (수치가 낮을수록 고성능)
+
+| Operation | MySQL (RDBMS) | Redis (NoSQL) | Speedup (Redis vs MySQL) |
+| :---: | :---: | :---: | :---: |
+| Insert | 1.37 ms | 0.23 ms | 5.84x Faster |
+| Select | 1.05 ms | 0.15 ms | 6.61x Faster |
+| Delete | 1.74 ms | 0.14 ms | 12.33x Faster |
+| Average | 1.39 ms | 0.17 ms | 7.78x Faster |
+
+### 결과 분석
+* Disk I/O vs In-Memory: Redis는 디스크 I/O 대기 시간 없이 메모리에서 모든 연산이 수행되므로 압도적인 성능 차이를 보였습니다.
+* 자료구조 (O(log N) vs O(1)): MySQL은 PK 조회를 위해 B-Tree 인덱스를 탐색해야 하지만, Redis는 Hash 기반으로 데이터 양과 무관하게 일정한 접근 속도를 유지했습니다.
+
+
+## 7. 한계점 및 기술적 회고
+
+### 실험의 한계
+- 네트워크 오버헤드: 로컬 환경에서의 측정이므로, 실제 클라우드 환경의 Network RTT가 반영되지 않았습니다.
+- 트랜잭션 부재: RDBMS의 강점인 ACID 트랜잭션 보장과 복잡한 Join 연산 시나리오는 제외된 단순 CRUD 비교입니다.
+
+
+### 8. 시사점 및 배운 점
+
+1. 적재적소의 저장소 선택:
+단순 조회 성능이 최대 12배까지 차이나는 것을 확인하며, 세션이나 캐시 데이터는 Redis로, 데이터 정합성이 중요한 정보는 MySQL로 처리하는 하이브리드 아키텍처의 필요성을 체감했습니다.
+
+2. 설계의 중요성:
+실험 코드를 작성하며 Template Method Pattern으로 로직의 중복을 제거하고, Spring Profile로 테스트 환경을 격리하는 과정을 통해 견고한 애플리케이션 설계 역량을 향상시켰습니다.
+
+3. 데이터 기반 사고:
+"NoSQL이 빠르다"는 막연한 추측 대신, 자료구조(B-Tree vs Hash)의 차이가 실제 Latency에 어떻게 반영되는지 수치로 확인함으로써 기술 도입의 타당성을 설명할 수 있게 되었습니다.
