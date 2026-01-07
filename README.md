@@ -33,7 +33,7 @@
 
 단순한 API 호출 테스트가 아닌, 실험의 재현성과 변수 통제를 위해 다음과 같은 설계를 적용했습니다.
 
-### 2.1 Template Method Pattern
+### Template Method Pattern
 두 데이터베이스의 측정 방식이 다르면 오차가 발생할 수 있습니다. 이를 방지하기 위해 AbstractBatchExperiment 추상 클래스를 설계하여 실험의 라이프사이클을 통제했습니다.
 
 - Source: src/main/java/com/benchmark/core/AbstractBatchExperiment.java
@@ -41,7 +41,7 @@
     - run() 메서드 내에서 워밍업, 타이머 측정, 로깅 흐름을 고정.
     - 하위 구현체(MysqlBatchExperiment, RedisBatchExperiment)는 순수 DB 연산 로직만 구현하도록 강제하여 측정 오차 최소화.
 
-### 2.2 리소스 격리
+### 리소스 격리
 정확한 Redis 성능 측정을 위해, Redis 실험 실행 시 RDBMS 관련 리소스가 메모리를 점유하거나 커넥션을 맺는 것을 차단했습니다.
 
 - Source: src/main/resources/application-redis.yml
@@ -50,13 +50,13 @@
 
 ## 3. 실험 환경 및 시나리오
 
-### 3.1 Environment
+### Environment
 * OS: Windows 11 (64bit)
 * H/W: Intel Core i5-1340P, 16GB RAM
 * Stack: Java 11, Spring Boot 2.7.16, Gradle 8.5
 * Database: MySQL 8.0.33, Redis 6.4.0
 
-### 3.2 Methodology
+### Methodology
 * Data Size: 총 10,000건의 데이터 (Integer Key-Value)
 * Batch: 1,000건 단위로 나누어 평균 수행 시간(ms) 측정
 * Operation:
