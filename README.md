@@ -23,7 +23,7 @@
 
 ### Architecture Comparison
 
-| MySQL (Relational Model) | Redis (Key-Value Model) |
+| MySQL | Redis |
 | :---: | :---: |
 | ![MySQL Architecture](./images/mysql_architecture.png) | ![Redis Architecture](./images/redis_architecture.png) |
 | 관계 중심 구조 (Join 기반 접근)<br>인덱스 탐색 및 디스크 I/O 발생 | Direct Key–Value 접근 구조<br>메모리 직접 접근으로 Latency 최소화 |
