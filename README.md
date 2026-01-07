@@ -28,7 +28,7 @@
 | MySQL (RDBMS) | Redis (NoSQL) |
 | :---: | :---: |
 | ![MySQL Architecture](./images/mysql_architecture.png) | ![Redis Architecture](./images/redis_architecture.png) |
-| Join 기반 접근<br>인덱스 탐색 및 디스크 I/O 발생 | Direct Key–Value 접근 구조<br>메모리 직접 접근으로 Latency 최소화 |
+| Join 기반 접근 구조<br>인덱스 탐색 및 디스크 I/O 발생 | Direct Key–Value 접근 구조<br>메모리 직접 접근으로 Latency 최소화 |
 
 ### Architecture Overview
 위의 이론적 차이를 검증하기 위해, 동일한 Spring Boot 애플리케이션 로직 내에서 실행 Profile을 통해 하위 구현체만 변경하는 방식으로 변수를 통제했습니다.
