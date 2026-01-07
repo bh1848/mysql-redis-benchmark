@@ -111,7 +111,7 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 
 ### 성능 비교 그래프
 
-![Performance Result](./images/result_graph.png)
+![Performance Result](./images/result_graph.jpg)
 
 > Note: 파란색(왼쪽)은 MySQL, 빨간색(오른쪽)은 Redis입니다.
 
