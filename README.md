@@ -21,12 +21,20 @@
 대규모 트래픽을 처리하는 백엔드 시스템에서 데이터 저장소 선택은 성능의 핵심 변수입니다.
 단순히 "NoSQL이 빠르다"는 통념을 넘어, "단순 CRUD 작업에서 Redis 도입이 RDBMS 대비 수치적으로 어느 정도의 이점을 주는가?"를 증명하여, 실무적인 캐싱 전략 수립의 근거를 마련하고자 했습니다.
 
-### Architecture Comparison
+### 이론적 배경
+본 실험의 핵심은 저장 매체와 자료구조의 근본적인 차이에서 발생하는 성능 격차를 확인하는 것입니다.
 
 | MySQL | Redis |
 | :---: | :---: |
 | ![MySQL Architecture](./images/mysql_architecture.png) | ![Redis Architecture](./images/redis_architecture.png) |
 | 관계 중심 구조 (Join 기반 접근)<br>인덱스 탐색 및 디스크 I/O 발생 | Direct Key–Value 접근 구조<br>메모리 직접 접근으로 Latency 최소화 |
+
+### 실험 설계
+위의 이론적 차이를 검증하기 위해, 동일한 Spring Boot 애플리케이션 로직 내에서 실행 Profile을 통해 하위 구현체만 변경하는 방식으로 변수를 통제했습니다.
+
+![Experimental Architecture](./images/architecture_overview.png)
+> - Profile 분기: 실행 시점의 Profile에 따라 `JdbcTemplate` 또는 `RedisTemplate`으로 로직이 분기됩니다.
+> - 설계 의도: 공통 비즈니스 로직은 유지한 채, 최종 저장소에 접근하는 기술과 인프라(Disk vs Memory)만 변경하여 순수한 성능 차이를 측정하도록 설계했습니다.
 
 
 ## 2. 설계 의도
@@ -36,16 +44,13 @@
 ### Template Method Pattern
 두 데이터베이스의 측정 방식이 다르면 오차가 발생할 수 있습니다. 이를 방지하기 위해 AbstractBatchExperiment 추상 클래스를 설계하여 실험의 라이프사이클을 통제했습니다.
 
-- Source: src/main/java/com/benchmark/core/AbstractBatchExperiment.java
-- Design:
-    - run() 메서드 내에서 워밍업, 타이머 측정, 로깅 흐름을 고정.
-    - 하위 구현체(MysqlBatchExperiment, RedisBatchExperiment)는 순수 DB 연산 로직만 구현하도록 강제하여 측정 오차 최소화.
+- run() 메서드 내에서 워밍업, 타이머 측정, 로깅 흐름을 고정했습니다.
+- 하위 구현체(MysqlBatchExperiment, RedisBatchExperiment)는 순수 DB 연산 로직만 구현하도록 강제하여 측정 오차를 최소화했습니다.
 
 ### 리소스 격리
 정확한 Redis 성능 측정을 위해, Redis 실험 실행 시 RDBMS 관련 리소스가 메모리를 점유하거나 커넥션을 맺는 것을 차단했습니다.
 
-- Source: src/main/resources/application-redis.yml
-- Detail: Spring Boot의 autoconfigure.exclude 옵션을 사용하여 DataSource, Hibernate, TransactionManager 등 실험과 무관한 Bean 생성을 원천 차단했습니다.
+- Spring Boot의 autoconfigure.exclude 옵션을 사용하여 DataSource, Hibernate, TransactionManager 등 실험과 무관한 Bean 생성을 원천 차단했습니다.
 
 
 ## 3. 실험 환경 및 시나리오
