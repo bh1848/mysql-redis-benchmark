@@ -42,7 +42,7 @@ Redis가 MySQL에 비해 얼마나 빠른지 직접 환경을 구축하고 수�
 ## 2. 실험 설계
 
 ### - 측정 지표
-DB 내부의 쿼리 실행 시간(Execution Time)만이 아닌, 실제 백엔드 서버의 총 응답 시간을 측정했습니다.
+DB 내부의 쿼리 실행 시간만이 아닌, 실제 백엔드 서버의 총 응답 시간을 측정했습니다.
 - `Time = Serialization + Network I/O + DB Execution + Deserialization`
 
 ### - Test Workload
