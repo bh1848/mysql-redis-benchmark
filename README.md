@@ -61,12 +61,14 @@ DB 내부의 쿼리 실행 시간만이 아닌, 실제 백엔드 서버의 총 �
 
 ## 3. 실험 환경
 
-- **OS:** Windows 11 (64bit)
-- **CPU/RAM:** Intel Core i5-1340P, 16GB RAM
-- **Tech Stack:** Java 11, Spring Boot 2.7.16, Gradle 8.5
-- **DB Version:** MySQL 8.0.33, Redis 6.4.0
-- **Data:** Integer Key-Value 데이터 10,000건
-- **Scenario:** 1,000건 단위 순차 반복 실행 후 평균 수행 시간(ms) 측정
+- **하드웨어:** Intel Core i5-1340P, 16GB RAM, Windows 11 (64bit)
+- **소프트웨어:** Java 11, Spring Boot 2.7.16, MySQL 8.0.33, Redis 6.4.0
+- **데이터셋:**
+  - Synthetic Key-Value: 10,000건의 Integer 기반 더미 데이터
+- **파라미터 설정:** 
+  - Total Operations ($N$) = 10,000
+  - Batch Size ($B$) = 1,000 (Connection Pool 부하 및 측정 오차 제어를 위한 단위)
+  - Metric = Average Latency (ms)
 
 > **Why Localhost?**  
 > 네트워크 지연 변수를 최소화하고, 순수하게 Disk B-Tree vs In-Memory Hash의 차이에 집중하기 위해 로컬 환경에서 Loopback 통신으로 수행했습니다.
