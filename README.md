@@ -47,11 +47,11 @@ DB 내부의 쿼리 실행 시간(Execution Time)만이 아닌, 실제 백엔드
 - `Time = Serialization + Network I/O + DB Execution + Deserialization`
 
 ### 2) Test Workload
-- JDBC Batch 기능 등의 최적화 기법을 배제하고, 순수하게 **1회 호출 당 처리 속도**를 비교하기 위해 10,000회의 Single Operation을 반복 수행했습니다.
-- 실험 시작 전 **Warm-up** 과정을 거쳐 Connection Pool(HikariCP) 초기화 비용을 배제했으며, 풀 사이즈를 충분히 확보하여 Connection 대기 시간을 통제했습니다.
+- JDBC Batch 기능 등의 최적화 기법을 배제하고, 순수하게 1회 호출 당 처리 속도를 비교하기 위해 10,000회의 Single Operation을 반복 수행했습니다.
+- 실험 시작 전 Warm-up 과정을 거쳐 Connection Pool(HikariCP) 초기화 비용을 배제했으며, 풀 사이즈를 충분히 확보하여 Connection 대기 시간을 통제했습니다.
 - `AbstractBatchExperiment` 클래스를 통해 워밍업, 시간 측정, 로깅 로직을 중앙화하여 구현체 별 측정 오차를 제거했습니다.
 
-### 3) 리소스 격리 (Isolation)
+### 3) 리소스 격리
 - Spring Profile 기능을 활용하여 테스트 대상이 아닌 DB의 Bean 생성을 차단(`autoconfigure.exclude`), 메모리 및 Connection Pool 간섭을 방지했습니다.
 
 
@@ -61,8 +61,8 @@ DB 내부의 쿼리 실행 시간(Execution Time)만이 아닌, 실제 백엔드
 - **CPU/RAM:** Intel Core i5-1340P, 16GB RAM
 - **Tech Stack:** Java 11, Spring Boot 2.7.16, Gradle 8.5
 - **DB Version:** MySQL 8.0.33, Redis 6.4.0
-- **Data:** Integer Key-Value 데이터 10,000건 (Payload 크기 통제)
-- **Scenario:** 1,000건 단위 순차 반복 실행(Iterative Execution) 후 평균 수행 시간(ms) 측정
+- **Data:** Integer Key-Value 데이터 10,000건
+- **Scenario:** 1,000건 단위 순차 반복 실행 후 평균 수행 시간(ms) 측정
 
 > **Why Localhost?**
 > 네트워크 지연 변수를 최소화하고, 순수하게 Disk B-Tree vs In-Memory Hash의 차이에 집중하기 위해 로컬 환경에서 Loopback 통신으로 수행했습니다.
@@ -73,13 +73,13 @@ DB 내부의 쿼리 실행 시간(Execution Time)만이 아닌, 실제 백엔드
 ~~~bash
 src/main/java/com/benchmark
 ├── core
-│   └── [AbstractBatchExperiment.java](./src/main/java/com/benchmark/core/AbstractBatchExperiment.java)  # Template Method (실험 제어 로직)
+│   └── [AbstractBatchExperiment.java](./src/main/java/com/benchmark/core/AbstractBatchExperiment.java)
 ├── mysql
 │   ├── [MysqlBatchExperiment.java](./src/main/java/com/benchmark/mysql/MysqlBatchExperiment.java)     # JDBC 구현체
 │   └── application-mysql.yml         # MySQL 설정
 ├── redis
 │   ├── [RedisBatchExperiment.java](./src/main/java/com/benchmark/redis/RedisBatchExperiment.java)     # RedisTemplate 구현체
-│   ├── [RedisConfig.java](./src/main/java/com/benchmark/redis/RedisConfig.java)              # 직렬화 설정
+│   ├── [RedisConfig.java](./src/main/java/com/benchmark/redis/RedisConfig.java)             
 │   └── application-redis.yml         # Redis 설정
 └── BenchmarkApplication.java
 ~~~
@@ -140,15 +140,18 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 ## 7. 결론 및 고찰
 
 ### 연구의 한계
-본 실험은 로컬 환경과 단일 스레드 기반으로 수행되어 다음과 같은 제약 사항을 가집니다.
+한계점은 다음과 같습니다.
+- 논문에서 언급했듯 Redis는 Loose Consistency를 가집니다. 본 실험은 Latency 측정에 집중했으나, 데이터 무결성이 최우선인 환경에서는 RDBMS와의 트레이드오프를 고려해야 함을 상기했습니다.
 - `System.currentTimeMillis()`를 사용하여 'ms' 단위의 체감 지연 시간을 측정했습니다. `System.nanoTime()`보다는, I/O가 포함된 애플리케이션 레벨의 경향성을 파악하는 데 집중했습니다.
 - 실제 클라우드 환경의 RTT 미반영 및 Redis의 단일 스레드 아키텍처에서 대규모 동시 접속 시 발생할 수 있는 병목 현상은 검증 범위에서 제외되었습니다.
 
-### Key Insights
-실험을 통해 도출한 결론은 다음과 같습니다.
-1. 단순 조회 시 7.8배, 삭제 시 12배의 성능 격차를 확인함으로써, Read-Heavy 하거나 빈번한 갱신이 일어나는 데이터에 대한 Redis 캐싱 전략이 비용 대비 높은 효율을 낸다는 것을 확인했습니다.
-2. 동일한 로직이라도 하드웨어 상태와 초기화 변수에 따라 결과가 달라질 수 있음을 인지했습니다. 따라서 Template Method 패턴으로 로직을 통제하고 환경을 격리하는 것이 데이터의 신뢰도 확보에 필수적임을 배웠습니다.
+### Insights
+결론은 다음과 같습니다.
+1.  단순 조회 시 7.8배, 삭제 시 12배의 성능 격차를 확인함으로써, Read-Heavy 하거나 빈번한 갱신이 일어나는 데이터에 대한 Redis 캐싱 전략이 비용 대비 높은 효율을 낸다는 것을 검증했습니다.
+2.  동일한 로직이라도 하드웨어 상태와 초기화 변수에 따라 결과가 달라질 수 있음을 인지했습니다. 따라서 `Template Method` 패턴으로 로직을 통제하고 환경을 격리하는 것이 데이터의 신뢰도 확보에 필수적임을 배웠습니다.
 
 ### Future Work
+향후 연구 과제는 다음과 같습니다.
+- 현재의 MySQL vs Redis 비교를 넘어, MongoDB 등 다양한 NoSQL 유형과의 성능 비교를 통해 데이터 성격에 따른 최적의 DB 선택 전략을 수립할 예정입니다.
 - 현재의 Java 11 / Spring Boot 2.7 환경을 Java 17+ 및 Spring Boot 3.x로 마이그레이션하여, `Record` 클래스 등을 활용한 DTO 경량화 및 최신 GC 성능 개선 효과를 추가로 검증할 계획입니다.
 - 평균 응답 시간 외에 P95, P99 지표를 추가하여 간헐적인 Jitter 현상을 분석할 예정입니다.
