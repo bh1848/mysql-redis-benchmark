@@ -22,7 +22,6 @@ Redis가 MySQL에 비해 얼마나 빠른지 직접 환경을 구축하고 수�
 
 ## 1. 개요
 
-### - 관련 논문
 ![논문 표지](./images/paper_header.png)
 *(그림: JICS 2024에 게재된 논문 초록 및 저자 정보)*
 
@@ -34,8 +33,6 @@ Redis가 MySQL에 비해 얼마나 빠른지 직접 환경을 구축하고 수�
 | **Disk I/O & B-Tree**<br>디스크 접근 및 인덱스 탐색 비용 발생 | **In-Memory & Hash**<br>메모리 직접 접근, Key-Value 조회 (O(1)) |
 
 ### - 실험 아키텍처
-비교의 공정성을 위해 동일한 Spring Boot 애플리케이션 내에서 Profile만 변경하여 테스트했습니다.
-
 ![Experimental Architecture](./images/architecture_overview.png)
 
 > - 실행 옵션에 따라 JdbcTemplate / RedisTemplate 선택
@@ -66,7 +63,7 @@ DB 내부의 쿼리 실행 시간(Execution Time)만이 아닌, 실제 백엔드
 - **Data:** Integer Key-Value 데이터 10,000건
 - **Scenario:** 1,000건 단위 순차 반복 실행 후 평균 수행 시간(ms) 측정
 
-> **Why Localhost?**
+> **Why Localhost?**  
 > 네트워크 지연 변수를 최소화하고, 순수하게 Disk B-Tree vs In-Memory Hash의 차이에 집중하기 위해 로컬 환경에서 Loopback 통신으로 수행했습니다.
 
 
@@ -116,13 +113,9 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 
 ## 6. 실험 결과
 
-### - 성능 비교 그래프
-
 ![Performance Result](./images/result_graph.jpg)
 
 > **Note:** 파란색(좌) MySQL / 빨간색(우) Redis
-
-### - 상세 지표
 
 | Operation | MySQL (Disk/B-Tree) | Redis (Memory/Hash) | Speedup | Complexity |
 | :---: | :---: | :---: | :---: | :---: |
@@ -131,10 +124,9 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 | Delete | 1.74 ms | 0.14 ms | 12.3배 | O(log N) vs O(1) |
 | **Average** | **1.39 ms** | **0.17 ms** | **7.8배** | - |
 
-### - 결과 분석
-특히 Delete 연산에서 12배 이상의 가장 큰 성능 격차가 발생했습니다.
-- **MySQL:** 트랜잭션 보장을 위한 Undo Log 기록 및 삭제 후 B-Tree 인덱스 재정렬 비용이 발생합니다.
-- **Redis:** Hash 구조상 키를 찾아 메모리 포인터만 해제하는 O(1) 연산이므로 오버헤드가 거의 없습니다.
+> 특히 Delete 연산에서 12배 이상의 가장 큰 성능 격차가 발생했습니다.
+> - **MySQL:** 트랜잭션 보장을 위한 Undo Log 기록 및 삭제 후 B-Tree 인덱스 재정렬 비용이 발생합니다.
+> - **Redis:** Hash 구조상 키를 찾아 메모리 포인터만 해제하는 O(1) 연산이므로 오버헤드가 거의 없습니다.
 
 
 ## 7. 트러블 슈팅
