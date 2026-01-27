@@ -6,9 +6,9 @@
 ![Redis](https://img.shields.io/badge/Redis-6.4-DC382D?logo=redis&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-> **논문 제목:** MySQL과 Redis의 데이터 처리 성능 비교 평가 (Comparative Evaluation of Data Processing Performance between MySQL and Redis)
-> **저자:** 방혁, 김서현, 전상훈 (수원대학교)
-> **게재:** Journal of Internet Computing and Services (JICS), 2024
+> **논문 제목:** MySQL과 Redis의 데이터 처리 성능 비교 평가 (Comparative Evaluation of Data Processing Performance between MySQL and Redis)  
+> **저자:** 방혁, 김서현, 전상훈 (수원대학교)  
+> **게재:** Journal of Internet Computing and Services (JICS), 2024  
 
 RDBMS(MySQL)와 NoSQL(Redis)의 실제 CRUD 처리 성능을 비교/분석한 벤치마크 프로젝트입니다. 동일한 애플리케이션 로직 하에 Disk vs Memory의 차이가 실제 애플리케이션 Latency에 미치는 영향을 검증했습니다.
 Redis가 MySQL에 비해 얼마나 빠른지 직접 환경을 구축하고 수치로 측정하여, 상황에 맞게 DB 선택을 하고자 했습니다.
