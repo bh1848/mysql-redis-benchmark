@@ -114,8 +114,6 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 
 ## 6. 실험 결과
 
-10,000건의 데이터 처리 실험 결과, Redis는 MySQL 대비 압도적인 성능 우위를 보였습니다.
-
 ### 성능 비교 그래프
 
 ![Performance Result](./images/result_graph.jpg)
