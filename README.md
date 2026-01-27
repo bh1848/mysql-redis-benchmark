@@ -1,13 +1,5 @@
 # ⚖️ MySQL vs Redis Performance Benchmark
 
-![Java](https://img.shields.io/badge/Java-11-007396?logo=java&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-2.7-6DB33F?logo=springboot&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-6.4-DC382D?logo=redis&logoColor=white)
-
-> **관련 논문:** [MySQL과 Redis의 데이터 처리 성능 비교 평가 (JICS, 2024)]
-> **저자:** 방혁, 김서현, 전상훈
-
 RDBMS(MySQL)와 NoSQL(Redis)의 실제 CRUD 처리 성능을 비교/분석한 벤치마크 프로젝트입니다. 동일한 애플리케이션 로직 하에 Disk vs Memory의 차이가 실제 애플리케이션 Latency에 미치는 영향을 검증했습니다.
 Redis가 MySQL에 비해 얼마나 빠른지 직접 환경을 구축하고 수치로 측정하여, 상황에 맞게 DB 선택을 하고자 했습니다.
 
@@ -23,6 +15,12 @@ Redis가 MySQL에 비해 얼마나 빠른지 직접 환경을 구축하고 수�
 
 
 ## 1. 프로젝트 개요
+
+### 📄 관련 논문
+본 프로젝트는 실제 투고된 논문 **[MySQL과 Redis의 데이터 처리 성능 비교 평가 (JICS, 2024)]**의 실험 과정을 코드로 구현하고 검증한 결과입니다.
+
+![논문 표지](./images/paper_header.png)
+*(그림: JICS 2024에 게재된 논문 초록 및 저자 정보)*
 
 ### 비교 대상 구조 (Disk vs Memory)
 
