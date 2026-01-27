@@ -30,6 +30,12 @@ Redis가 MySQL에 비해 얼마나 빠른지 직접 환경을 구축하고 수�
 ![논문 표지](./images/paper_header.png)
 *(그림: JICS 2024에 게재된 논문 초록 및 저자 정보)*
 
+### - 실험 아키텍처
+![Experimental Architecture](./images/architecture_overview.png)
+
+> - 실행 옵션에 따라 JdbcTemplate / RedisTemplate 선택할 수 있습니다.
+> - 공통 비즈니스 로직은 유지하고 하부 저장소 접근 기술만 변경하여 순수 성능 차이를 측정했습니다.
+
 ### - Disk vs Memory
 
 | MySQL (RDBMS) | Redis (NoSQL) |
@@ -37,11 +43,6 @@ Redis가 MySQL에 비해 얼마나 빠른지 직접 환경을 구축하고 수�
 | ![MySQL Architecture](./images/mysql_architecture.png) | ![Redis Architecture](./images/redis_architecture.png) |
 | **Disk I/O & B-Tree**<br>디스크 접근 및 인덱스 탐색 비용 발생 | **In-Memory & Hash**<br>메모리 직접 접근, Key-Value 조회 (O(1)) |
 
-### - 실험 아키텍처
-![Experimental Architecture](./images/architecture_overview.png)
-
-> - 실행 옵션에 따라 JdbcTemplate / RedisTemplate 선택
-> - 공통 비즈니스 로직은 유지하고 하부 저장소 접근 기술만 변경하여 순수 성능 차이 측정
 
 
 ## 2. 실험 설계
@@ -127,7 +128,7 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 | Delete | 1.74 ms | 0.14 ms | 12.3배 | O(log N) vs O(1) |
 | **Average** | **1.39 ms** | **0.17 ms** | **7.8배** | - |
 
-> **Note:** 결과적으로, In-Memory 기반의 Redis는 Disk 기반의 MySQL 대비 평균 7.8배 빠른 Latency를 기록했습니다. 특히 Delete 연산에서 12배 이상의 가장 큰 성능 격차가 발생했습니다.
+> **Note:** In-Memory 기반의 Redis는 Disk 기반의 MySQL 대비 평균 7.8배 빠른 Latency를 기록했습니다. 특히 Delete 연산에서 12배 이상의 가장 큰 성능 격차가 발생했습니다.
 > - **MySQL:** 트랜잭션 보장을 위한 Undo Log 기록 및 삭제 후 B-Tree 인덱스 재정렬 비용이 발생합니다.
 > - **Redis:** Hash 구조상 키를 찾아 메모리 포인터만 해제하는 O(1) 연산이므로 오버헤드가 거의 없습니다.
 
