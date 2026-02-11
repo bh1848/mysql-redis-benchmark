@@ -124,9 +124,9 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 
 | 문제 상황 | 원인 | 해결 방법 | 기술 블로그 |
 | :--- | :--- | :--- | :---: |
-| **테스트 데이터 누적** | 독립적 실행 환경(Clean State) 미보장 | `ddl-auto: create` 옵션으로 매회 초기화 | [🔗 Link](링크주소) |
-| **시간 측정 정밀도 한계** | `currentTimeMillis`의 해상도 부족 (0ms) | Batch 단위 총 시간 측정 후 역산 방식 적용 | [🔗 Link](링크주소) |
-| **동기 실행(Sync) 병목** | Network RTT가 전체 성능을 지배 | RTT를 포함한 'Client Side Latency'로 지표 변경 | [🔗 Link](링크주소) |
+| **반복 테스트 시 데이터 누적 및 PK 충돌** | 테스트 간 독립적인 Clean 환경 미보장 | `ddl-auto: create` 옵션으로 매 실행 시 초기화 | [🔗 Link](링크주소) |
+| **단건 조회 시 `0ms` 측정되는 현상** | `currentTimeMillis`의 정밀도 한계 (OS 종속) | Batch 단위 총 소요 시간을 측정하여 평균 역산 | [🔗 Link](링크주소) |
+| **이론 대비 현저히 낮은 처리량(OPS)** | 동기식(Sync) 구조로 인한 Network RTT 병목 | RTT를 포함한 'Client Side Latency'로 지표 정의 | [🔗 Link](링크주소) |
 
 
 ## 7. 한계 및 향후 과제
