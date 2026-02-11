@@ -15,17 +15,16 @@ Redis가 MySQL에 비해 얼마나 빠른지 직접 환경을 구축하고 수�
 
 
 ## 📋 목차
-1. [개요](#1-개요)
-2. [실험 설계](#2-실험-설계)
+1. [프로젝트 소개](#1-프로젝트-소개)
+2. [실험 구조](#2-실험-구조)
 3. [실험 환경](#3-실험-환경)
-4. [프로젝트 구조](#4-프로젝트-구조)
-5. [실행 방법](#5-실행-방법)
-6. [실험 결과](#6-실험-결과)
-7. [트러블 슈팅](#7-트러블-슈팅)
-8. [결론](#8-결론)
+5. [실행 방법](#4-실행-방법)
+6. [실험 결과](#5-실험-결과)
+7. [트러블 슈팅](#6-트러블-슈팅)
+8. [한계 및 향후 과제](#7-한계-및-향후-과제)
 
 
-## 1. 개요
+## 1. 프로젝트 소개
 ### - 관련 논문
 ![논문 표지](./images/paper_header.png)
 *(그림: JICS 2024에 게재된 논문 초록 및 저자 정보)*
@@ -45,7 +44,7 @@ Redis가 MySQL에 비해 얼마나 빠른지 직접 환경을 구축하고 수�
 
 
 
-## 2. 실험 설계
+## 2. 실험 구조
 
 ### - 측정 지표
 DB 내부의 쿼리 실행 시간만이 아닌, 실제 백엔드 서버의 총 응답 시간을 측정했습니다.
@@ -75,24 +74,7 @@ DB 내부의 쿼리 실행 시간만이 아닌, 실제 백엔드 서버의 총 �
 > 네트워크 지연 변수를 최소화하고, 순수하게 Disk B-Tree vs In-Memory Hash의 차이에 집중하기 위해 로컬 환경에서 Loopback 통신으로 수행했습니다.
 
 
-## 4. 프로젝트 구조
-
-~~~bash
-src/main/java/com/benchmark
-├── core
-│   └── [AbstractBatchExperiment.java](./src/main/java/com/benchmark/core/AbstractBatchExperiment.java) ## 공통 벤치마크 로
-├── mysql
-│   ├── [MysqlBatchExperiment.java](./src/main/java/com/benchmark/mysql/MysqlBatchExperiment.java)     # JDBC 구현체
-│   └── application-mysql.yml         # MySQL 설정
-├── redis
-│   ├── [RedisBatchExperiment.java](./src/main/java/com/benchmark/redis/RedisBatchExperiment.java)     # RedisTemplate 구현체
-│   ├── [RedisConfig.java](./src/main/java/com/benchmark/redis/RedisConfig.java)             
-│   └── application-redis.yml         # Redis 설정
-└── BenchmarkApplication.java
-~~~
-
-
-## 5. 실행 방법
+## 4. 실행 방법
 
 ### - 벤치마크 실행
 
@@ -115,7 +97,7 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 ~~~
 
 
-## 6. 실험 결과
+## 5. 실험 결과
 
 ![Performance Result](./images/result_graph.jpg)
 
@@ -133,7 +115,7 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 > - **Redis:** Hash 구조상 키를 찾아 메모리 포인터만 해제하는 O(1) 연산이므로 오버헤드가 거의 없습니다.
 
 
-## 7. 트러블 슈팅
+## 6. 트러블 슈팅
 ### - Test Isolation
 * **문제 상황:** 벤치마크를 반복 실행할 때마다 데이터베이스에 이전 테스트 데이터가 누적되어, `INSERT` 성능이 점차 저하되거나 PK 중복 에러가 발생하는 문제를 확인했습니다.
 * **원인 분석:** 테스트 실행 시점마다 Clean 환경이 보장되지 않아 실험의 독립성이 훼손됐습니다.
@@ -154,7 +136,7 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 * **결과:** 단순히 DB 엔진의 속도가 아니라, 실제 클라이언트가 겪는 Latency 차이를 명확하게 시각화했습니다.
 
 
-## 8. 결론
+## 7. 한계 및 향후 과제
 
 ### - 한계점
 - Redis는 Loose Consistency를 가집니다. 본 실험은 Latency 측정에 집중했으나, 데이터 무결성이 최우선인 환경에서는 RDBMS와의 트레이드오프를 고려해야 함을 상기했습니다.
