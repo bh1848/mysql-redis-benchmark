@@ -75,10 +75,6 @@ DB 내부의 쿼리 실행 시간만이 아닌, 실제 백엔드 서버의 총 �
   - Batch Size (B) = 1,000 (Connection Pool 부하 및 측정 오차 제어를 위한 단위)
   - Metric = Average Latency (ms)
 
-> **Why Localhost?**  
-> 네트워크 지연 변수를 최소화하고, 순수하게 Disk B-Tree vs In-Memory Hash의 차이에 집중하기 위해 로컬 환경에서 Loopback 통신으로 수행했습니다.
-
-
 ## 4. 실행 방법
 
 ### 벤치마크 실행
