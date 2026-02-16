@@ -13,6 +13,7 @@
 RDBMS(MySQL)와 NoSQL(Redis)의 실제 CRUD 처리 성능을 비교/분석한 벤치마크 프로젝트입니다. 동일한 애플리케이션 로직 하에 Disk vs Memory의 차이가 실제 애플리케이션 Latency에 미치는 영향을 검증했습니다.
 Redis가 MySQL에 비해 얼마나 빠른지 직접 환경을 구축하고 수치로 측정하여, 상황에 맞게 DB 선택을 하고자 했습니다.
 
+<br>
 
 ## 📋 목차
 1. [프로젝트 소개](#1-프로젝트-소개)
@@ -23,6 +24,7 @@ Redis가 MySQL에 비해 얼마나 빠른지 직접 환경을 구축하고 수�
 7. [트러블 슈팅](#6-트러블-슈팅)
 8. [한계 및 향후 과제](#7-한계-및-향후-과제)
 
+<br>
 
 ## 1. 프로젝트 소개
 
@@ -47,7 +49,7 @@ Redis가 MySQL에 비해 얼마나 빠른지 직접 환경을 구축하고 수�
 | ![MySQL Architecture](./images/mysql_architecture.png) | ![Redis Architecture](./images/redis_architecture.png) |
 | **Disk I/O & B-Tree**<br>디스크 접근 및 인덱스 탐색 비용 발생 | **In-Memory & Hash**<br>메모리 직접 접근, Key-Value 조회 (O(1)) |
 
-
+<br>
 
 ## 2. 실험 구조
 
@@ -63,6 +65,7 @@ DB 내부의 쿼리 실행 시간만이 아닌, 실제 백엔드 서버의 총 �
 ### 리소스 격리
 - Spring Profile 기능을 활용하여 테스트 대상이 아닌 DB의 Bean 생성을 차단(`autoconfigure.exclude`), 메모리 및 Connection Pool 간섭을 방지했습니다.
 
+<br>
 
 ## 3. 실험 환경
 
@@ -74,6 +77,8 @@ DB 내부의 쿼리 실행 시간만이 아닌, 실제 백엔드 서버의 총 �
   - Total Operations (N) = 10,000
   - Batch Size (B) = 1,000 (Connection Pool 부하 및 측정 오차 제어를 위한 단위)
   - Metric = Average Latency (ms)
+
+<br>
 
 ## 4. 실행 방법
 
@@ -97,6 +102,7 @@ gradlew bootRun --args="--spring.profiles.active=mysql"
 gradlew bootRun --args="--spring.profiles.active=redis"
 ~~~
 
+<br>
 
 ## 5. 실험 결과
 
@@ -115,6 +121,9 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 > - **MySQL:** 트랜잭션 보장을 위한 Undo Log 기록 및 삭제 후 B-Tree 인덱스 재정렬 비용이 발생합니다.
 > - **Redis:** Hash 구조상 키를 찾아 메모리 포인터만 해제하는 O(1) 연산이므로 오버헤드가 거의 없습니다.
 
+<br>
+
+<div id="troubleshooting"></div>
 
 ## 6. 트러블 슈팅
 
@@ -141,6 +150,8 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 - **Task**: 서버 성능이 아닌 아키텍처 구조(Blocking I/O)와 물리적 네트워크 비용(RTT) 간의 상관관계 분석.
 - **Action**: 벤치마크 지표를 단순 서버 처리 시간이 아닌, 직렬화 및 RTT를 포함한 'Client Side Latency'로 재정의하여 애플리케이션 관점의 실질적 병목 구간 규명.
 - **Result**: 동기식(Synchronous) 환경에서는 성능이 DB가 아닌 Network Bound(RTT)에 의해 결정됨을 증명하고, 올바른 성능 튜닝의 방향성 제시.
+
+<br>
 
 ## 7. 한계 및 향후 과제
 
