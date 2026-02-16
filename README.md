@@ -123,8 +123,6 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 
 <br>
 
-<div id="troubleshooting"></div>
-
 ## 6. 트러블 슈팅
 
 ### 1. JPA ddl-auto를 이용한 테스트 격리와 멱등성 확보
