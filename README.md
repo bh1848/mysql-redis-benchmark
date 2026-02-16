@@ -121,7 +121,7 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 ### 1. JPA ddl-auto를 이용한 테스트 격리와 멱등성 확보
 [👉 포스트 보러가기](https://bh1848.github.io/hzeror/MySQL-Redis-benchmarks-ddl-auto/)
 
-- **Situation**: 반복적인 벤치마크 실행 시, 이전 테스트의 잔존 데이터로 인해 `Duplicate entry` 에러가 발생하며 테스트의 **멱등성(Idempotency)**이 훼손됨.
+- **Situation**: 반복적인 벤치마크 실행 시, 이전 테스트의 잔존 데이터로 인해 `Duplicate entry` 에러가 발생하며 테스트의 멱등성(Idempotency)이 훼손됨.
 - **Task**: 성능 측정에 영향을 주는 `DELETE` 쿼리(인덱스 파편화 유발) 없이, 매 실행마다 완벽하게 격리된 초기 상태(Clean State)를 보장하는 환경 구축.
 - **Action**: JPA `ddl-auto: create` 옵션을 적용하여 애플리케이션 구동 시 스키마를 재생성하도록 설정하고, Spring Profile을 통해 테스트 환경을 엄격히 분리.
 - **Result**: PK 충돌 없는 안정적인 자동화 테스트 환경을 구축하고, 인덱스 파편화가 없는 순수 성능 측정 데이터 확보.
@@ -129,18 +129,18 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 ### 2. System.currentTimeMillis()의 정밀도 한계와 측정 오차 개선
 [👉 포스트 보러가기](https://bh1848.github.io/hzeror/MySQL-Redis-benchmarks-precise-execution-time-measurement/)
 
-- **Situation**: Windows OS 환경에서 `System.currentTimeMillis()`의 정밀도(10~15ms) 한계로 인해, 마이크로초 단위로 처리되는 Redis의 조회 시간이 **0ms**로 측정되는 현상 발생.
+- **Situation**: Windows OS 환경에서 `System.currentTimeMillis()`의 정밀도(10~15ms) 한계로 인해, 마이크로초 단위로 처리되는 Redis의 조회 시간이 0ms로 측정되는 현상 발생.
 - **Task**: OS 타이머의 해상도 한계를 극복하고, 1ms 미만의 응답 속도를 가진 Redis의 성능을 정량적으로 측정.
-- **Action**: 단건 실행 시간 측정 방식에서 **배치(Batch) 단위 총 소요 시간 측정 후 평균을 역산**하는 방식으로 변경하여 개별 연산의 미세한 오차를 상쇄.
-- **Result**: 숨겨져 있던 Redis의 평균 응답 속도 **0.17ms**를 정확히 측정(MySQL 1.05ms 대비 약 6.6배)하여 데이터의 신뢰성 확보.
+- **Action**: 단건 실행 시간 측정 방식에서 배치(Batch) 단위 총 소요 시간 측정 후 평균을 역산하는 방식으로 변경하여 개별 연산의 미세한 오차를 상쇄.
+- **Result**: 숨겨져 있던 Redis의 평균 응답 속도 0.17ms를 정확히 측정(MySQL 1.05ms 대비 약 6.6배)하여 데이터의 신뢰성 확보.
 
 ### 3. 동기식 I/O 환경에서 Network RTT가 처리량에 미치는 영향 분석
 [👉 포스트 보러가기](https://bh1848.github.io/hzeror/MySQL-Redis-benchmark-RTT/)
 
 - **Situation**: Redis 서버의 리소스가 충분함에도 불구하고, 벤치마크 클라이언트의 처리량(OPS)이 이론적 성능에 미치지 못하는 병목 현상 확인.
 - **Task**: 서버 성능이 아닌 아키텍처 구조(Blocking I/O)와 물리적 네트워크 비용(RTT) 간의 상관관계 분석.
-- **Action**: 벤치마크 지표를 단순 서버 처리 시간이 아닌, 직렬화 및 RTT를 포함한 **'Client Side Latency'**로 재정의하여 애플리케이션 관점의 실질적 병목 구간 규명.
-- **Result**: 동기식(Synchronous) 환경에서는 성능이 DB가 아닌 **Network Bound(RTT)**에 의해 결정됨을 증명하고, 올바른 성능 튜닝의 방향성 제시.
+- **Action**: 벤치마크 지표를 단순 서버 처리 시간이 아닌, 직렬화 및 RTT를 포함한 'Client Side Latency'로 재정의하여 애플리케이션 관점의 실질적 병목 구간 규명.
+- **Result**: 동기식(Synchronous) 환경에서는 성능이 DB가 아닌 Network Bound(RTT)에 의해 결정됨을 증명하고, 올바른 성능 튜닝의 방향성 제시.
 
 ## 7. 한계 및 향후 과제
 
