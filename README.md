@@ -125,7 +125,7 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 
 ## 6. 트러블 슈팅
 
-### 1. JPA ddl-auto를 이용한 테스트 격리와 멱등성 확보
+### 1. JPA ddl-auto를 이용한 스키마 초기화
 [👉 포스트 보러가기](https://bh1848.github.io/hzeror/MySQL-Redis-benchmarks-ddl-auto/)
 
 - **Situation**: 반복적인 벤치마크 실행 시, 이전 테스트의 잔존 데이터로 인해 `Duplicate entry` 에러가 발생하며 테스트의 멱등성(Idempotency)이 훼손됨.
@@ -133,7 +133,7 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 - **Action**: JPA `ddl-auto: create` 옵션을 적용하여 애플리케이션 구동 시 스키마를 재생성하도록 설정하고, Spring Profile을 통해 테스트 환경을 엄격히 분리.
 - **Result**: PK 충돌 없는 안정적인 자동화 테스트 환경을 구축하고, 인덱스 파편화가 없는 순수 성능 측정 데이터 확보.
 
-### 2. System.currentTimeMillis()의 정밀도 한계와 측정 오차 개선
+### 2. currentTimeMillis의 해상도 한계와 배치 단위 개선
 [👉 포스트 보러가기](https://bh1848.github.io/hzeror/MySQL-Redis-benchmarks-precise-execution-time-measurement/)
 
 - **Situation**: Windows OS 환경에서 `System.currentTimeMillis()`의 정밀도(10~15ms) 한계로 인해, 마이크로초 단위로 처리되는 Redis의 조회 시간이 0ms로 측정되는 현상 발생.
@@ -141,7 +141,7 @@ gradlew bootRun --args="--spring.profiles.active=redis"
 - **Action**: 단건 실행 시간 측정 방식에서 배치(Batch) 단위 총 소요 시간 측정 후 평균을 역산하는 방식으로 변경하여 개별 연산의 미세한 오차를 상쇄.
 - **Result**: 숨겨져 있던 Redis의 평균 응답 속도 0.17ms를 정확히 측정(MySQL 1.05ms 대비 약 6.6배)하여 데이터의 신뢰성 확보.
 
-### 3. 동기식 I/O 환경에서 Network RTT가 처리량에 미치는 영향 분석
+### 3. 네트워크 RTT에 따른 Redis 처리량 병목 분석
 [👉 포스트 보러가기](https://bh1848.github.io/hzeror/MySQL-Redis-benchmark-RTT/)
 
 - **Situation**: Redis 서버의 리소스가 충분함에도 불구하고, 벤치마크 클라이언트의 처리량(OPS)이 이론적 성능에 미치지 못하는 병목 현상 확인.
