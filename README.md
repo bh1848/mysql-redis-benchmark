@@ -1,4 +1,4 @@
-# ⚖️ MySQL vs Redis: 저장 매체에 따른 CRUD 성능 벤치마크
+# MySQL vs Redis: 저장 매체에 따른 CRUD 성능 벤치마크
 
 > **"Disk 기반 RDBMS와 In-Memory NoSQL의 실제 응답 속도 차이를 분석한 성능 비교 연구"**
 
@@ -9,14 +9,14 @@
   <img src="https://img.shields.io/badge/Redis-7.4-DC382D?style=flat-square&logo=redis&logoColor=white"/>
 </p>
 
-## 📄 논문 정보
+## 논문 정보
 * **제목**: MySQL과 Redis의 데이터 처리 성능 비교 평가
 * **학술지**: JICS 2024 게재 (KCI)
 * **저자**: 방혁, 김서현, 전상훈
 
 <br/>
 
-## 1. 프로젝트 요약
+## 📌 1. 프로젝트 요약
 **실제 Spring Boot 애플리케이션 환경에서 메모리와 디스크 사이에서 발생하는 지연 시간(Latency)을 측정**했습니다. 같은 비즈니스 로직에서 MySQL과 Redis가 어느 정도 성능 차이를 보이는지 분석하여, 상황에 맞는 DB를 고르는 기준을 세우려 했습니다.
 
 <br/>
