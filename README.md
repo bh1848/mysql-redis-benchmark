@@ -1,6 +1,6 @@
 # ⚖️ MySQL vs Redis: 저장 매체에 따른 CRUD 성능 벤치마크
 
-> **"Disk 기반 RDBMS와 In-Memory NoSQL의 실제 응답 속도 차이를 정량적으로 분석한 성능 비교 연구"**
+> **"Disk 기반 RDBMS와 In-Memory NoSQL의 실제 응답 속도 차이를 분석한 성능 비교 연구"**
 
 <p align="left">
   <img src="https://img.shields.io/badge/Java-11-007396?style=flat-square&logo=java&logoColor=white"/>
