@@ -48,20 +48,23 @@
 
 ## 4. 트러블슈팅
 
-### [1. JPA `ddl-auto`를 활용한 테스트 데이터 격리](https://velog.io/@bh1848/JPA-ddl-auto%EB%A5%BC-%EC%9D%B4%EC%9A%A9%ED%95%9C-%EC%8A%A4%ED%82%A4%EB%A7%88-%EC%B4%88%EA%B8%B0%ED%99%94)
+### 1. JPA `ddl-auto`를 활용한 테스트 데이터 격리
 - **문제**: 반복 테스트 시 잔존 데이터로 인해 중복 키 에러(`Duplicate entry`)가 발생하고, 데이터 누적에 따른 인덱스 오버헤드로 측정 결과의 일관성 결여.
 - **해결**: JPA의 **`ddl-auto: create`** 전략을 채택하여 앱 컨텍스트 로드 시마다 스키마를 초기화함으로써 테스트 환경을 완전히 격리함.
 - **결과**: 외부 변수를 차단한 상태에서 독립적인 테스트 환경을 구축하고, 인덱스 상태에 따른 측정 오차 제거.
+- **Blog**: [결정적 ID 생성에 따른 PK 충돌 해결 및 ddl-auto 기반 환경 초기화](https://velog.io/@bh1848/JPA-ddl-auto%EB%A5%BC-%EC%9D%B4%EC%9A%A9%ED%95%9C-%EC%8A%A4%ED%82%A4%EB%A7%88-%EC%B4%88%EA%B8%B0%ED%99%94)
 
-### [2. 배치(Batch) 측정을 통한 시스템 타이머 해상도 한계 극복](https://velog.io/@bh1848/currentTimeMillis%EC%9D%98-%ED%95%B4%EC%83%81%EB%8F%84-%ED%95%9C%EA%B3%84%EC%99%80-%EC%82%B0%EC%88%A0-%ED%8F%89%EA%B7%A0-%EC%B8%A1%EC%A0%95)
+### 2. 배치(Batch) 측정을 통한 시스템 타이머 해상도 한계 극복
 - **문제**: Redis의 초고속 연산 처리가 OS 시스템 타이머의 정밀도 한계를 넘어서면서 단건 조회 시간이 **0ms**로 뭉뚱그려 측정되는 현상 확인.
 - **해결**: 1,000건 단위의 배치 연산 총 소요 시간을 측정한 뒤 이를 평균값으로 나누어 역산하는 **산술 평균 방식** 도입.
 - **결과**: 0ms로 측정되던 Redis의 실제 평균 속도(**0.17ms**)를 정밀하게 도출하여 데이터 신뢰성 확보.
+- **Blog**: [System.currentTimeMillis() 해상도 한계 극복을 위한 통계적 보정 및 Redis Latency 산출](https://velog.io/@bh1848/currentTimeMillis%EC%9D%98-%ED%95%B4%EC%83%81%EB%8F%84-%ED%95%9C%EA%B3%84%EC%99%80-%EC%82%B0%EC%88%A0-%ED%8F%89%EA%B7%A0-%EC%B8%A1%EC%A0%95)
 
-### [3. 네트워크 RTT 기반의 시스템 병목 구간 규명](https://velog.io/@bh1848/%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC-RTT%EC%97%90-%EB%94%B0%EB%A5%B8-Redis-%EC%B2%98%EB%A6%AC%EB%9F%89-%EB%B3%91%EB%AA%A9-%EB%B6%84%EC%84%9D)
+### 3. 네트워크 RTT 기반의 시스템 병목 구간 규명
 - **문제**: 고사양 서버 환경임에도 실제 처리량(Throughput)이 이론적 기대치에 미치지 못하는 클라이언트 측 병목 현상 발생.
 - **해결**: 측정 범위를 DB 내부 엔진 처리 시간에서 직렬화 및 네트워크 왕복 시간(**RTT**)을 포함한 **Client-Side Latency**로 재정의하여 병목 원인 분석.
 - **결과**: 동기식 환경에서 전체 성능 임계치는 DB 엔진 성능보다 네트워크 IO 비용에 의해 결정됨을 지표로 입증.
+- **Blog**: [Stop-and-Wait 프로토콜에 따른 Redis Throughput 저하 및 Client Side Latency 분석](https://velog.io/@bh1848/%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC-RTT%EC%97%90-%EB%94%B0%EB%A5%B8-Redis-%EC%B2%98%EB%A6%AC%EB%9F%89-%EB%B3%91%EB%AA%A9-%EB%B6%84%EC%84%9D)
 
 <br/>
 
