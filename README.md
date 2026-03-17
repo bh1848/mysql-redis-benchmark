@@ -7,25 +7,23 @@
 * **학술지**: JICS 2024 게재 (KCI)
 * **저자**: 방혁, 김서현, 전상훈
 
-<br/>
+---
 
 ## 1. 프로젝트 요약
 **실제 Spring Boot 애플리케이션 환경에서 메모리와 디스크 사이에서 발생하는 지연 시간(Latency)을 측정**했습니다. 같은 비즈니스 로직에서 MySQL과 Redis가 어느 정도 성능 차이를 보이는지 분석하여, 상황에 맞는 DB를 고르는 기준을 세우려 했습니다.
 
-<br/>
+---
 
 ## 2. 실험 구조
-![Experimental Architecture](./images/architecture_overview.png)
 
 * **같은 환경에서 테스트**: 공통 로직은 그대로 두고 Spring Profile을 써서 저장소 접근 방식(JDBC vs RedisTemplate)만 바꿔가며 순수 성능 차이를 쟀습니다.
 * **측정 기준**: DB 내부 실행 시간뿐만 아니라 데이터 변환, 네트워크 왔다 갔다 하는 시간(RTT)을 모두 포함한 **전체 응답 시간**을 기준으로 삼았습니다.
 
-<br/>
+---
 
 ## 3. 실험 결과 (10,000건 단건 연산 기준)
-메모리 기반의 Redis가 디스크 기반의 MySQL보다 **평균 7.8배 빠른 속도**를 보였습니다.
 
-![Performance Result](./images/result_graph.jpg)
+메모리 기반의 Redis가 디스크 기반의 MySQL보다 **평균 7.8배 빠른 속도**를 보였습니다.
 
 | 연산 | MySQL (Disk) | Redis (Memory) | 개선율 |
 | :---: | :---: | :---: | :---: |
